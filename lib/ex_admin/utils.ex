@@ -193,7 +193,13 @@ defmodule ExAdmin.Utils do
     admin_resource_path(conn.assigns.resource.__struct__, method, args)
   end
   def admin_resource_path(resource_model, method, args) when is_atom(resource_model) do
-    resource_name = resource_model |> ExAdmin.Utils.base_name |> Inflex.underscore |> Inflex.pluralize
+    resource_name =
+      case ExAdmin.get_registered(resource_model) do
+         nil ->
+           resource_model |> ExAdmin.Utils.base_name |> Inflex.underscore |> Inflex.pluralize
+         registered ->
+           registered.resource_name |> Inflex.pluralize
+       end
     apply(router(), :admin_resource_path, [endpoint(), method || :index, resource_name | args])
   end
   def admin_resource_path(resource, method, args) when is_map(resource) do
