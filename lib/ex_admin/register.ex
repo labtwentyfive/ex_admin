@@ -179,7 +179,12 @@ defmodule ExAdmin.Register do
       end
       controller_filters = (Module.get_attribute(__MODULE__, :controller_filters) || [])
       |> ExAdmin.Helpers.group_reduce_by_reverse
-
+      resource_name = resource_name(module)
+      resource_name = case Module.get_attribute(__MODULE__, :options) do
+        nil -> resource_name
+        options ->
+          Keyword.get(options, :resource_name, resource_name)
+      end
       action_labels = ExAdmin.Register.get_action_labels(Module.get_attribute(__MODULE__, :actions))
       actions =
         ExAdmin.Register.get_action_items(Module.get_attribute(__MODULE__, :actions), @all_options)
@@ -191,7 +196,7 @@ defmodule ExAdmin.Register do
                 title_actions: &ExAdmin.default_resource_title_actions/2,
                 type: :resource,
                 resource_model: module,
-                resource_name: resource_name(module),
+                resource_name: resource_name,
                 query_opts: query_opts,
                 controller_route: controller_route,
                 menu: menu_opts,
